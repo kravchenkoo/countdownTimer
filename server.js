@@ -20,7 +20,6 @@ const port = process.env.PORT || 3000;
 app.get('/countdown', (req, res) => {
   const now = new Date();
   let diff = TARGET_DATE - now;
-
   if (diff < 0) diff = 0;
 
   const totalSeconds = Math.floor(diff / 1000);
@@ -33,20 +32,28 @@ app.get('/countdown', (req, res) => {
 
   const text = `Timer for promocode: ${hours}h:${minutes}m:${seconds}s`;
 
-  const canvas = createCanvas(WIDTH, HEIGHT);
+  // Create a temporary canvas to measure text width
+  const tempCanvas = createCanvas(0, 0);
+  const tempCtx = tempCanvas.getContext('2d');
+  tempCtx.font = '22px Arial';
+  const textMetrics = tempCtx.measureText(text);
+  const textWidth = textMetrics.width;
+
+  // Add some padding
+  const canvasWidth = Math.ceil(textWidth + 40); // 20px padding each side
+  const canvasHeight = HEIGHT;
+
+  const canvas = createCanvas(canvasWidth, canvasHeight);
   const ctx = canvas.getContext('2d');
 
-  // Background (transparent)
+  // Background transparent
   ctx.fillStyle = 'rgba(0,0,0,0)';
-  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+  ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-  // Font style (Arial Regular 22px)
+  // Draw text
   ctx.font = '22px Arial';
   ctx.fillStyle = '#ffffff';
-
-  // Vertical centering
-  const textY = HEIGHT / 2 + 8;
-
+  const textY = canvasHeight / 2 + 8;
   ctx.fillText(text, 20, textY);
 
   res.set('Content-Type', 'image/png');
